@@ -1,0 +1,23 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "dapr.audit.api": "StartDebugging",
+        "dapr.audit.api-dapr": "StartWithoutDebugging",
+        "dapr.ordering.api": "StartDebugging",
+        "dapr.ordering.api-dapr": "StartWithoutDebugging",
+        "dapr.payment.api": "StartDebugging",
+        "dapr.payment.api-dapr": "StartWithoutDebugging",
+        "dapr.users.api": "StartDebugging",
+        "dapr.users.api-dapr": "StartWithoutDebugging",
+        "dapr.webstatus": "StartDebugging",
+        "zipkin": "StartWithoutDebugging",
+        "rabbitmq": "StartWithoutDebugging",
+        "mariadb": "StartWithoutDebugging",
+        "seq": "StartWithoutDebugging"
+      }
+    }
+  }
+}
