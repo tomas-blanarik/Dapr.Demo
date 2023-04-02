@@ -1,0 +1,184 @@
+version: '3.7'
+
+services:
+  placement:
+    image: "daprio/dapr"
+    command: ["./placement", "-port", "50000", "-log-level", "debug"]
+    networks:
+      - dapr-net
+
+  zipkin:
+    image: openzipkin/zipkin-slim
+    networks:
+      - dapr-net
+
+  rabbitmq:
+    image: rabbitmq:management
+    restart: always
+    networks:
+      - dapr-net
+
+  mariadb:
+    image: mariadb
+    restart: always
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - dapr-net
+
+  seq:
+    image: datalust/seq:latest
+    networks:
+      - dapr-net
+
+  dapr-audit-api:
+    image: ${DOCKER_REGISTRY-}daprauditapi
+    restart: always
+    build:
+      context: .
+      dockerfile: Dapr.Audit.Api/Dockerfile
+    depends_on:
+      - placement
+      - rabbitmq
+      - mariadb
+      - seq
+      - zipkin
+    networks:
+      - dapr-net
+
+  dapr-audit-api-dapr:
+    image: "daprio/daprd:1.9.4"
+    network_mode: "service:dapr-audit-api"
+    restart: always
+    command: ["./daprd",
+      "-app-id", "dapr-audit-api",
+      "-app-port", "80",
+      "-placement-host-address", "placement:50000",
+      "-dapr-grpc-port", "50010",
+      "-components-path", "/components",
+      "-config", "/configuration/config.yaml"
+      ]
+    depends_on:
+      - dapr-audit-api
+    volumes:
+      - "./dapr/components/:/components"
+      - "./dapr/configuration/:/configuration"
+
+  dapr-ordering-api:
+    image: ${DOCKER_REGISTRY-}daprorderingapi
+    restart: always
+    build:
+      context: .
+      dockerfile: Dapr.Ordering.Api/Dockerfile
+    depends_on:
+      - placement
+      - rabbitmq
+      - mariadb
+      - seq
+      - zipkin
+    networks:
+      - dapr-net
+
+  dapr-ordering-api-dapr:
+    image: "daprio/daprd:1.9.4"
+    network_mode: "service:dapr-ordering-api"
+    restart: always
+    command: ["./daprd",
+      "-app-id", "dapr-ordering-api",
+      "-app-port", "80",
+      "-placement-host-address", "placement:50000",
+      "-dapr-grpc-port", "50020",
+      "-components-path", "/components",
+      "-config", "/configuration/config.yaml"
+      ]
+    depends_on:
+      - dapr-ordering-api
+    volumes:
+      - "./dapr/components/:/components"
+      - "./dapr/configuration/:/configuration"
+
+  dapr-payment-api:
+    image: ${DOCKER_REGISTRY-}daprpaymentapi
+    restart: always
+    build:
+      context: .
+      dockerfile: Dapr.Payment.Api/Dockerfile
+    depends_on:
+      - placement
+      - rabbitmq
+      - mariadb
+      - seq
+      - zipkin
+    networks:
+      - dapr-net
+
+  dapr-payment-api-dapr:
+    image: "daprio/daprd:1.9.4"
+    network_mode: "service:dapr-payment-api"
+    restart: always
+    command: ["./daprd",
+      "-app-id", "dapr-payment-api",
+      "-app-port", "80",
+      "-placement-host-address", "placement:50000",
+      "-dapr-grpc-port", "50030",
+      "-components-path", "/components",
+      "-config", "/configuration/config.yaml"
+      ]
+    depends_on:
+      - dapr-payment-api
+    volumes:
+      - "./dapr/components/:/components"
+      - "./dapr/configuration/:/configuration"
+
+  dapr-users-api:
+    image: ${DOCKER_REGISTRY-}daprusersapi
+    restart: always
+    build:
+      context: .
+      dockerfile: Dapr.Users.Api/Dockerfile
+    depends_on:
+      - placement
+      - rabbitmq
+      - mariadb
+      - seq
+      - zipkin
+    networks:
+      - dapr-net
+
+  dapr-users-api-dapr:
+    image: "daprio/daprd:1.9.4"
+    network_mode: "service:dapr-users-api"
+    restart: always
+    command: ["./daprd",
+      "-app-id", "dapr-users-api",
+      "-app-port", "80",
+      "-placement-host-address", "placement:50000",
+      "-dapr-grpc-port", "50040",
+      "-components-path", "/components",
+      "-config", "/configuration/config.yaml"
+      ]
+    depends_on:
+      - dapr-users-api
+    volumes:
+      - "./dapr/components/:/components"
+      - "./dapr/configuration/:/configuration"
+
+  dapr-webstatus:
+    image: ${DOCKER_REGISTRY-}daprwebstatus
+    restart: always
+    build:
+      context: .
+      dockerfile: Dapr.WebStatus/Dockerfile
+    depends_on:
+      - dapr-audit-api
+      - dapr-ordering-api
+      - dapr-users-api
+      - dapr-payment-api
+    networks:
+      - dapr-net
+
+volumes:
+  mariadb_data:
+
+networks:
+  dapr-net:    
