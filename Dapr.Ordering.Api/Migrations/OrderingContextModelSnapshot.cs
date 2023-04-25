@@ -56,6 +56,48 @@ namespace Dapr.Ordering.Api.Migrations
 
                     b.ToTable("Orders");
                 });
+
+            modelBuilder.Entity("Dapr.Ordering.Api.Entities.Domain.OrderItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("EntityId")
+                        .IsRequired()
+                        .HasColumnType("char(36)");
+
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("OrderItems");
+                });
+
+            modelBuilder.Entity("Dapr.Ordering.Api.Entities.Domain.OrderItem", b =>
+                {
+                    b.HasOne("Dapr.Ordering.Api.Entities.Domain.Order", null)
+                        .WithMany("Items")
+                        .HasForeignKey("OrderId");
+                });
+
+            modelBuilder.Entity("Dapr.Ordering.Api.Entities.Domain.Order", b =>
+                {
+                    b.Navigation("Items");
+                });
 #pragma warning restore 612, 618
         }
     }

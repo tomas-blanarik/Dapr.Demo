@@ -1,4 +1,6 @@
-﻿using Dapr.Core.Middlewares;
+﻿using Dapr.Client;
+using Dapr.Core.Middlewares;
+using Dapr.Extensions.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +19,26 @@ namespace Dapr.Core.Extensions;
 
 public static class WebApplicationBuilderExtensions
 {
+    public static void AddCustomConfiguration(this WebApplicationBuilder builder)
+    {
+        try
+        {
+            var daprClient = new DaprClientBuilder().Build();
+            builder.Configuration.AddDaprSecretStore(
+                DaprConstants.Components.SecretStore,
+                daprClient,
+                new[] { "--", ":", "__" },
+                TimeSpan.FromSeconds(10));
+
+            Log.Logger.Information("Successfully registered Dapr Secret Store to IConfiguration");
+        }
+        catch (Exception e)
+        {
+            Log.Logger.Error(e, "Cannot register dapr secret store to the configuration: {Message}", e.Message);
+            throw;
+        }
+    }
+
     public static void AddCustomSerilog(this WebApplicationBuilder builder, string appName)
     {
         var seqServerUrl = builder.Configuration["SeqServerUrl"];

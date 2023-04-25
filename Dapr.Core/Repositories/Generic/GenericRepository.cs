@@ -92,6 +92,18 @@ public class GenericRepository<T> : IGenericReadRepository<T>, IGenericWriteRepo
         return entity is null ? throw new DomainEntityNotFoundException(typeof(T), id) : entity;
     }
 
+    public async Task<T> GetWithChildrenAsync(Guid id, params string[] includes)
+    {
+        var query = _storage.Set().AsNoTracking();
+        foreach (var include in includes)
+        {
+            query = query.Include(include);
+        }
+
+        T? entity = await query.SingleOrDefaultAsync(x => x.EntityId == id);
+        return entity is null ? throw new DomainEntityNotFoundException(typeof(T), id) : entity;
+    }
+
     public async Task<T> UpdateAsync(Guid id, Action<T> updateEntityFunction, CancellationToken ct = default)
     {
         T entity = await GetAsync(id, ct);

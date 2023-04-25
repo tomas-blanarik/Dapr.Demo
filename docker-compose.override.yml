@@ -26,11 +26,15 @@ services:
     ports:
       - "5340:80"
 
+  redis:
+    ports:
+      - "6379:6379"
+
   dapr-audit-api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__DefaultConnection=Server=mariadb;Database=audit-db;Uid=root;Pwd=root;
+#      - ConnectionStrings__DefaultConnection=Server=mariadb;Database=audit-db;Uid=root;Pwd=root;
       - ZipkinUrl=http://zipkin:9411
       - SeqServerUrl=http://seq
       - DAPR_GRPC_PORT=50010
@@ -42,7 +46,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__DefaultConnection=Server=mariadb;Database=ordering-db;Uid=root;Pwd=root;
+#      - ConnectionStrings__DefaultConnection=Server=mariadb;Database=ordering-db;Uid=root;Pwd=root;
       - ZipkinUrl=http://zipkin:9411
       - SeqServerUrl=http://seq
       - DAPR_GRPC_PORT=50020
@@ -54,7 +58,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__DefaultConnection=Server=mariadb;Database=payment-db;Uid=root;Pwd=root;
+#      - ConnectionStrings__DefaultConnection=Server=mariadb;Database=payment-db;Uid=root;Pwd=root;
       - ZipkinUrl=http://zipkin:9411
       - SeqServerUrl=http://seq
       - DAPR_GRPC_PORT=50030
@@ -66,13 +70,24 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__DefaultConnection=Server=mariadb;Database=ordering-db;Uid=root;Pwd=root;
+#      - ConnectionStrings__DefaultConnection=Server=mariadb;Database=users-db;Uid=root;Pwd=root;
       - ZipkinUrl=http://zipkin:9411
       - SeqServerUrl=http://seq
       - DAPR_GRPC_PORT=50040
     ports:
       - "5003:80"
       - "50040:50040"
+
+  dapr-basket-api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ZipkinUrl=http://zipkin:9411
+      - SeqServerUrl=http://seq
+      - DAPR_GRPC_PORT=50050
+    ports:
+      - "5004:80"
+      - "50050:50050"
 
   dapr-webstatus:
     environment:
@@ -86,5 +101,7 @@ services:
       - HealthChecksUI__HealthChecks__2__Uri=http://dapr-users-api/hc 
       - HealthChecksUI__HealthChecks__3__Name=Audit API 
       - HealthChecksUI__HealthChecks__3__Uri=http://dapr-audit-api/hc 
+      - HealthChecksUI__HealthChecks__4__Name=Basket API 
+      - HealthChecksUI__HealthChecks__4__Uri=http://dapr-basket-api/hc 
     ports:
       - "5100:80"

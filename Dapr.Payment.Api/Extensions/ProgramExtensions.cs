@@ -11,7 +11,7 @@ public static class ProgramExtensions
     {
         builder.Services.AddDbContext<PaymentContext>(o =>
         {
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            var connectionString = builder.Configuration.GetConnectionString("PaymentsDbConnection");
             o.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
             o.EnableDetailedErrors();
             o.EnableSensitiveDataLogging();

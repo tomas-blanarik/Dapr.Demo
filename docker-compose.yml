@@ -31,6 +31,15 @@ services:
     networks:
       - dapr-net
 
+  redis:
+    image: redis:latest
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - dapr-net
+
   dapr-audit-api:
     image: ${DOCKER_REGISTRY-}daprauditapi
     restart: always
@@ -163,6 +172,40 @@ services:
       - "./dapr/components/:/components"
       - "./dapr/configuration/:/configuration"
 
+  dapr-basket-api:
+    image: ${DOCKER_REGISTRY-}daprbasketapi
+    restart: always
+    build:
+      context: .
+      dockerfile: Dapr.Basket.Api/Dockerfile
+    depends_on:
+      - placement
+      - rabbitmq
+      - mariadb
+      - seq
+      - zipkin
+      - redis
+    networks:
+      - dapr-net
+
+  dapr-basket-api-dapr:
+    image: "daprio/daprd:1.9.4"
+    network_mode: "service:dapr-basket-api"
+    restart: always
+    command: ["./daprd",
+      "-app-id", "dapr-basket-api",
+      "-app-port", "80",
+      "-placement-host-address", "placement:50000",
+      "-dapr-grpc-port", "50050",
+      "-components-path", "/components",
+      "-config", "/configuration/config.yaml"
+      ]
+    depends_on:
+      - dapr-basket-api
+    volumes:
+      - "./dapr/components/:/components"
+      - "./dapr/configuration/:/configuration"
+
   dapr-webstatus:
     image: ${DOCKER_REGISTRY-}daprwebstatus
     restart: always
@@ -179,6 +222,7 @@ services:
 
 volumes:
   mariadb_data:
+  redis_data:
 
 networks:
   dapr-net:    

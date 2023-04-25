@@ -24,7 +24,7 @@ public class Payment : IDomainEntity<PaymentDTO>
     public Guid? UserId { get; set; }
 
     [Required]
-    public PaymentStatusEnum Status { get; set; }
+    public PaymentStatus Status { get; set; }
     public string? Error { get; set; }
 
     public PaymentDTO ToDTO() => new()

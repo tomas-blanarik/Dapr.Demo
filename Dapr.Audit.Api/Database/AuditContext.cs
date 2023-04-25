@@ -10,6 +10,6 @@ public class AuditContext : DbContext, IEntityStorage<AuditItem>
         : base(dbOptions)
     { }
 
-    public DbSet<AuditItem> AuditItems { get; set; }
+    public DbSet<AuditItem> AuditItems { get; set; } = null!;
     public DbSet<AuditItem> Set() => AuditItems;
 }

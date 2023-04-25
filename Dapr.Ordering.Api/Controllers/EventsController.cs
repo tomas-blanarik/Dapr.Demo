@@ -3,10 +3,13 @@ using Dapr.Core;
 using Dapr.Core.Events.Orders;
 using Dapr.Core.Events.Payments;
 using Dapr.Core.Exceptions;
+using Dapr.Core.Extensions;
 using Dapr.Core.Repositories;
 using Dapr.Core.Repositories.Generic;
 using Dapr.Ordering.Api.Entities.Domain;
+using Dapr.Ordering.Api.Entities.DTO;
 using Dapr.Ordering.Api.Entities.Enums;
+using Dapr.Ordering.Api.Entities.Events;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dapr.Ordering.Api.Controllers;
@@ -42,12 +45,12 @@ public class EventsController : ControllerBase
 
         entity = await repository.UpdateAsync(entity.EntityId!.Value, toUpdate =>
         {
-            if (toUpdate.Status == OrderStatusEnum.Completed || toUpdate.Status == OrderStatusEnum.Failed)
+            if (toUpdate.Status == OrderStatus.Completed || toUpdate.Status == OrderStatus.Failed)
             {
                 throw new ConflictException(string.Format("Order is already {0}", toUpdate.Status.ToString()));
             }
 
-            toUpdate.Status = OrderStatusEnum.Completed;
+            toUpdate.Status = OrderStatus.Completed;
             toUpdate.CompletedDate = DateTime.UtcNow;
         }, ct);
 
@@ -79,12 +82,12 @@ public class EventsController : ControllerBase
 
         await repository.UpdateAsync(entity.EntityId!.Value, toUpdate =>
         {
-            if (toUpdate.Status == OrderStatusEnum.Completed || toUpdate.Status == OrderStatusEnum.Failed)
+            if (toUpdate.Status == OrderStatus.Completed || toUpdate.Status == OrderStatus.Failed)
             {
                 throw new ConflictException(string.Format("Order is already {0}", toUpdate.Status.ToString()));
             }
 
-            toUpdate.Status = OrderStatusEnum.Failed;
+            toUpdate.Status = OrderStatus.Failed;
             toUpdate.CompletedDate = null;
             toUpdate.Error = @event.Reason;
         }, ct);
@@ -117,14 +120,72 @@ public class EventsController : ControllerBase
 
         await repository.UpdateAsync(entity.EntityId!.Value, toUpdate =>
         {
-            if (toUpdate.Status == OrderStatusEnum.Completed || toUpdate.Status == OrderStatusEnum.Failed)
+            if (toUpdate.Status == OrderStatus.Completed || toUpdate.Status == OrderStatus.Failed)
             {
                 throw new ConflictException(string.Format("Order is already {0}", toUpdate.Status.ToString()));
             }
 
-            toUpdate.Status = OrderStatusEnum.Failed;
+            toUpdate.Status = OrderStatus.Failed;
             toUpdate.PaymentId = null;
             toUpdate.Error = "Payment was deleted";
         }, ct);
+    }
+
+    [HttpPost(nameof(UserCheckoutAcceptedIntegrationEvent))]
+    [Topic(DaprConstants.Components.PubSub, nameof(UserCheckoutAcceptedIntegrationEvent))]
+    public async Task HandleAsync(UserCheckoutAcceptedIntegrationEvent @event,
+                                  [FromServices] IGenericWriteRepository<Order> repository,
+                                  [FromServices] DaprClient dapr,
+                                  [FromServices] ILogger<OrdersController> logger,
+                                  CancellationToken ct)
+    {
+        UserDTO? user = null;
+        try
+        {
+            user = await dapr.InvokeMethodAsync<UserDTO>(HttpMethod.Get,
+                                                         DaprConstants.Services.UsersService,
+                                                         $"/api/users/{@event.UserId}",
+                                                         ct);
+
+            if (user is null)
+            {
+                throw new InvalidOperationException("User is null");
+            }
+
+            logger.LogInformation("Successfully retrieved user: {UserId}", user.UserId);
+        }
+        catch (InvocationException ex)
+        {
+            if (ex.TryParseErrorResponse(out var response))
+            {
+                logger.LogDaprInvocationError(ex, response);
+                return;
+            }
+
+            logger.LogDaprInvocationError(ex);
+            throw new UnexpectedErrorException("Cannot read error response from dapr result");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "{ExceptionMessage}", ex.Message);
+            throw new UnexpectedErrorException(ex.Message);
+        }
+
+        Order entity = await repository.CreateAsync(@event.ToDomain, ct);
+        OrderDTO dto = entity.ToDTO();
+
+        // publish event
+        var createdEvent = new OrderCreatedIntegrationEvent
+        {
+            Amount = dto.Amount,
+            CreatedDate = dto.OrderDate!.Value,
+            OrderId = dto.OrderId,
+            UserId = user!.UserId
+        };
+
+        await dapr.PublishEventAsync(DaprConstants.Components.PubSub,
+                                     nameof(OrderCreatedIntegrationEvent),
+                                     createdEvent,
+                                     ct);
     }
 }

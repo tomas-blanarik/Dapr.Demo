@@ -30,12 +30,12 @@ public class PaymentsController : ControllerBase
     {
         Domain.Payment entity = await repository.UpdateAsync(paymentId!.Value, toUpdate =>
         {
-            if (toUpdate.Status == PaymentStatusEnum.Completed || toUpdate.Status == PaymentStatusEnum.Failed)
+            if (toUpdate.Status == PaymentStatus.Completed || toUpdate.Status == PaymentStatus.Failed)
             {
                 throw new ConflictException(string.Format("Payment is already: {0}", toUpdate.Status.ToString()));
             }
 
-            toUpdate.Status = PaymentStatusEnum.Completed;
+            toUpdate.Status = PaymentStatus.Completed;
             toUpdate.CompletedDate = DateTime.UtcNow;
         }, ct);
 
@@ -66,12 +66,12 @@ public class PaymentsController : ControllerBase
     {
         Domain.Payment entity = await repository.UpdateAsync(paymentId!.Value, toUpdate =>
         {
-            if (toUpdate.Status == PaymentStatusEnum.Completed || toUpdate.Status == PaymentStatusEnum.Failed)
+            if (toUpdate.Status == PaymentStatus.Completed || toUpdate.Status == PaymentStatus.Failed)
             {
                 throw new ConflictException(string.Format("Payment is already: {0}", toUpdate.Status.ToString()));
             }
 
-            toUpdate.Status = PaymentStatusEnum.Failed;
+            toUpdate.Status = PaymentStatus.Failed;
             toUpdate.CompletedDate = null;
             toUpdate.Error = model.Reason;
         }, ct);

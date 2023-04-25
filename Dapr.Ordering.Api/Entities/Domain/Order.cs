@@ -20,12 +20,13 @@ public class Order : IDomainEntity<OrderDTO>
     [Required]
     public DateTime? Date { get; set; }
     public DateTime? CompletedDate { get; set; }
-    public OrderStatusEnum Status { get; set; }
+    public OrderStatus Status { get; set; }
 
     [Required]
     public Guid? UserId { get; set; }
     public Guid? PaymentId { get; set; }
     public string? Error { get; set; }
+    public virtual ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
 
     public OrderDTO ToDTO() => new()
     {
@@ -36,6 +37,7 @@ public class Order : IDomainEntity<OrderDTO>
         UserId = UserId!.Value,
         PaymentId = PaymentId,
         CompletedDate = CompletedDate,
-        Error = Error
+        Error = Error,
+        Items = Items.Count > 0 ? Items.Select(x => x.ToDTO()).ToList() : null
     };
 }

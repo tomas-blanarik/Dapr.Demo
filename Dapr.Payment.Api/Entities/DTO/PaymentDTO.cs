@@ -9,7 +9,7 @@ public class PaymentDTO
     public Guid OrderId { get; set; }
     public Guid UserId { get; set; }
     public DateTime CreatedDate { get; set; }
-    public PaymentStatusEnum PaymentStatus { get; set; }
+    public PaymentStatus PaymentStatus { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public DateTime? CompletedDate { get; set; }

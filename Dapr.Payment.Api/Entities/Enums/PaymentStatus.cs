@@ -1,6 +1,6 @@
 ﻿namespace Dapr.Payment.Api.Entities.Enums;
 
-public enum PaymentStatusEnum
+public enum PaymentStatus
 {
     Initiated = 1,
     Completed,

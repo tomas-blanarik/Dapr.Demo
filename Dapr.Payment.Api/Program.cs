@@ -11,8 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.AddCustomSerilog(AppName);
+builder.AddCustomConfiguration();
 builder.AddCustomHealthChecks()
-    .AddMySql(builder.Configuration.GetConnectionString("DefaultConnection")!, "PaymentAPIDB-check", tags: new[] { "payment-db" });
+    .AddMySql(builder.Configuration.GetConnectionString("PaymentsDbConnection")!, "PaymentAPIDB-check", tags: new[] { "payment-db" });
 
 builder.AddCustomDatabaseAndRepositories();
 builder.AddErrorHandlingMiddleware();

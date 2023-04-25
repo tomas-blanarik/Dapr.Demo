@@ -27,7 +27,7 @@ public class EventsController : ControllerBase
             CreatedDate = DateTime.UtcNow,
             OrderId = @event.OrderId,
             UserId = @event.UserId,
-            Status = PaymentStatusEnum.Initiated
+            Status = PaymentStatus.Initiated
         }, ct);
 
         var createdEvent = new PaymentCreatedIntegrationEvent

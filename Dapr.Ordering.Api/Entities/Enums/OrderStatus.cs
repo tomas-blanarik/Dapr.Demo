@@ -1,6 +1,6 @@
 ﻿namespace Dapr.Ordering.Api.Entities.Enums;
 
-public enum OrderStatusEnum
+public enum OrderStatus
 {
     Created = 1,
     Paid,

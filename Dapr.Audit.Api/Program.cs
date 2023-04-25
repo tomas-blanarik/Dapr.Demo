@@ -12,8 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.AddCustomSerilog(AppName);
+builder.AddCustomConfiguration();
 builder.AddCustomHealthChecks()
-    .AddMySql(builder.Configuration.GetConnectionString("DefaultConnection")!, "AuditAPIDB-check", tags: new[] { "audit-db" });
+    .AddMySql(builder.Configuration.GetConnectionString("AuditDbConnection")!, "AuditAPIDB-check", tags: new[] { "audit-db" });
 
 builder.AddErrorHandlingMiddleware();
 builder.AddCustomDatabaseAndRepositories();

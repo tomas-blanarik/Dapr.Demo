@@ -8,11 +8,10 @@ const string AppName = "Users API";
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.AddCustomSerilog(AppName);
+builder.AddCustomConfiguration();
 builder.AddCustomHealthChecks()
-    .AddMySql(builder.Configuration.GetConnectionString("DefaultConnection")!, "UsersAPIDB-check", tags: new[] { "users-db" });
+    .AddMySql(builder.Configuration.GetConnectionString("UsersDbConnection")!, "UsersAPIDB-check", tags: new[] { "users-db" });
 
 builder.AddCustomDatabaseAndRepositories();
 builder.AddErrorHandlingMiddleware();

@@ -1,4 +1,5 @@
 using Dapr.Audit.Api.Entities.Domain;
+using Dapr.Audit.Api.Entities.Events;
 using Dapr.Core;
 using Dapr.Core.Events;
 using Dapr.Core.Events.Orders;
@@ -88,6 +89,16 @@ public class EventsController : ControllerBase
     [HttpPost(nameof(PaymentFailedIntegrationEvent))]
     [Topic(DaprConstants.Components.PubSub, nameof(PaymentFailedIntegrationEvent))]
     public async Task HandleAsync(PaymentFailedIntegrationEvent @event,
+                                  [FromServices] IGenericWriteRepository<AuditItem> repository,
+                                  CancellationToken ct) => await ProcessEventAsync(@event, repository, ct);
+
+    #endregion
+
+    #region Basket
+
+    [HttpPost(nameof(UserCheckoutAcceptedIntegrationEvent))]
+    [Topic(DaprConstants.Components.PubSub, nameof(UserCheckoutAcceptedIntegrationEvent))]
+    public async Task HandleAsync(UserCheckoutAcceptedIntegrationEvent @event,
                                   [FromServices] IGenericWriteRepository<AuditItem> repository,
                                   CancellationToken ct) => await ProcessEventAsync(@event, repository, ct);
 

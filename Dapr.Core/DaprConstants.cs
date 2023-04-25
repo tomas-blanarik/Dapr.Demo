@@ -5,6 +5,8 @@ public static class DaprConstants
     public static class Components
     {
         public const string PubSub = "pubsub";
+        public const string StateStore = "statestore";
+        public const string SecretStore = "secretstore";
     }
 
     public static class Services

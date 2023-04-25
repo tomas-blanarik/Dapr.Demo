@@ -10,6 +10,6 @@ public class PaymentContext : DbContext, IEntityStorage<Domain.Payment>
         : base(dbOptions)
     { }
 
-    public DbSet<Domain.Payment> Payments { get; set; }
+    public DbSet<Domain.Payment> Payments { get; set; } = null!;
     public DbSet<Domain.Payment> Set() => Payments;
 }
