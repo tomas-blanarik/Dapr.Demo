@@ -35,7 +35,7 @@ services:
       - SeqServerUrl=http://seq
       - DAPR_GRPC_PORT=50010
     ports:
-      - "5000:80"
+      - "5010:80"
       - "50010:50010"
 
   dapr-ordering-api:
