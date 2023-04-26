@@ -1,4 +1,5 @@
 ﻿using Dapr.Client;
+using Dapr.Workflow;
 using Dapr.Core;
 using Dapr.Core.Events.Orders;
 using Dapr.Core.Events.Payments;
@@ -11,6 +12,7 @@ using Dapr.Ordering.Api.Entities.DTO;
 using Dapr.Ordering.Api.Entities.Enums;
 using Dapr.Ordering.Api.Entities.Events;
 using Microsoft.AspNetCore.Mvc;
+using Dapr.Ordering.Api.Workflows;
 
 namespace Dapr.Ordering.Api.Controllers;
 
@@ -136,6 +138,7 @@ public class EventsController : ControllerBase
     public async Task HandleAsync(UserCheckoutAcceptedIntegrationEvent @event,
                                   [FromServices] IGenericWriteRepository<Order> repository,
                                   [FromServices] DaprClient dapr,
+                                  [FromServices] WorkflowEngineClient engine,
                                   [FromServices] ILogger<OrdersController> logger,
                                   CancellationToken ct)
     {
@@ -171,21 +174,31 @@ public class EventsController : ControllerBase
             throw new UnexpectedErrorException(ex.Message);
         }
 
-        Order entity = await repository.CreateAsync(@event.ToDomain, ct);
-        OrderDTO dto = entity.ToDTO();
-
-        // publish event
-        var createdEvent = new OrderCreatedIntegrationEvent
+        if (@event.UseWorkflow)
         {
-            Amount = dto.Amount,
-            CreatedDate = dto.OrderDate!.Value,
-            OrderId = dto.OrderId,
-            UserId = user!.UserId
-        };
+#pragma warning disable CS0618
+            var instanceId = Guid.NewGuid().ToString();
+            await engine.ScheduleNewWorkflowAsync(nameof(OrderProcessingWorkflow), instanceId, @event);
+#pragma warning restore CS0618
+        }
+        else
+        {
+            Order entity = await repository.CreateAsync(@event.ToDomain, ct);
+            OrderDTO dto = entity.ToDTO();
 
-        await dapr.PublishEventAsync(DaprConstants.Components.PubSub,
-                                     nameof(OrderCreatedIntegrationEvent),
-                                     createdEvent,
-                                     ct);
+            // publish event
+            var createdEvent = new OrderCreatedIntegrationEvent
+            {
+                Amount = dto.Amount,
+                CreatedDate = dto.OrderDate!.Value,
+                OrderId = dto.OrderId,
+                UserId = user!.UserId
+            };
+
+            await dapr.PublishEventAsync(DaprConstants.Components.PubSub,
+                                         nameof(OrderCreatedIntegrationEvent),
+                                         createdEvent,
+                                         ct);
+        }
     }
 }

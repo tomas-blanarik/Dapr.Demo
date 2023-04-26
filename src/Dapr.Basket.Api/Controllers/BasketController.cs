@@ -65,7 +65,8 @@ public class BasketController : ControllerBase
     public async Task<IActionResult> CheckoutAsync([FromRoute, Required] Guid? userId,
                                                    [FromServices] DaprClient dapr,
                                                    [FromServices] ILogger<BasketController> logger,
-                                                   CancellationToken ct)
+                                                   CancellationToken ct,
+                                                   [FromQuery] bool useWorkflow = false)
     {
         UserDTO? user = null;
         try
@@ -104,7 +105,8 @@ public class BasketController : ControllerBase
         var @event = new UserCheckoutAcceptedIntegrationEvent
         {
             Basket = basket,
-            UserId = user.UserId
+            UserId = user.UserId,
+            UseWorkflow = useWorkflow
         };
 
         await dapr.PublishEventAsync(DaprConstants.Components.PubSub, nameof(UserCheckoutAcceptedIntegrationEvent), @event, ct);

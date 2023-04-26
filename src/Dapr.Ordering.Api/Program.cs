@@ -1,7 +1,10 @@
 using System.Text.Json.Serialization;
 using Dapr.Core.Extensions;
+using Dapr.Ordering.Api.Activities;
 using Dapr.Ordering.Api.Database;
 using Dapr.Ordering.Api.Extensions;
+using Dapr.Ordering.Api.Workflows;
+using Dapr.Workflow;
 using HealthChecks.UI.Client;
 
 const string AppName = "Ordering API";
@@ -25,6 +28,17 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(o => o.EnableAnnotations());
 builder.Services.AddRouting(o => o.LowercaseUrls = true);
+builder.Services.AddDaprWorkflow(options =>
+{
+    // workflows
+    options.RegisterWorkflow<OrderProcessingWorkflow>();
+
+    // activities
+    options.RegisterActivity<CreateOrderActivity>();
+    options.RegisterActivity<CreatePaymentActivity>();
+    options.RegisterActivity<UpdateOrderWithPaymentActivity>();
+    options.RegisterActivity<NotifyActivity>();
+});
 
 var app = builder.Build();
 

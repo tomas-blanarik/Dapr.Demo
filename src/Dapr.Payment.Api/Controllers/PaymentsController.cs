@@ -20,6 +20,30 @@ namespace Dapr.Payment.Api.Controllers;
 [Produces("application/json")]
 public class PaymentsController : ControllerBase
 {
+    [HttpPost]
+    [SwaggerOperation(Tags = new[] { "Workflow" })]
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(PaymentDTO))]
+    [ProducesDefaultResponseType(typeof(ErrorResponse))]
+    public async Task<IActionResult> CreateAsync([FromBody, Bind] CreatePaymentModel model,
+                                                 [FromServices] GenericRepository<Domain.Payment> repository,
+                                                 [FromServices] DaprClient dapr,
+                                                 CancellationToken ct)
+    {
+        Domain.Payment entity = await repository.CreateAsync(() =>
+        {
+            return new Domain.Payment
+            {
+                CreatedDate = DateTime.UtcNow,
+                OrderId = model.OrderId,
+                UserId = model.UserId,
+                Status = PaymentStatus.Initiated
+            };
+        }, ct);
+
+        PaymentDTO dto = entity.ToDTO();
+        return StatusCode(StatusCodes.Status201Created, dto);
+    }
+
     [HttpPost("{paymentId:guid}/complete")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaymentDTO))]
     [ProducesDefaultResponseType(typeof(ErrorResponse))]

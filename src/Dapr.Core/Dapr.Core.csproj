@@ -29,6 +29,7 @@
     <PackageReference Include="zipkin4net" Version="1.5.0" />
     <PackageReference Include="zipkin4net.middleware.aspnetcore" Version="1.5.0" />
     <PackageReference Include="Dapr.Extensions.Configuration" Version="1.10.0" />
+    <PackageReference Include="Dapr.Workflow" Version="1.10.0" />
   </ItemGroup>
 
 </Project>
