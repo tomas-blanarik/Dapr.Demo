@@ -2,6 +2,7 @@
 using Dapr.Core;
 using Dapr.Core.Events.Orders;
 using Dapr.Core.Events.Payments;
+using Dapr.Core.Events.Users;
 using Dapr.Core.Exceptions;
 using Dapr.Core.Repositories;
 using Dapr.Core.Repositories.Generic;
@@ -51,11 +52,8 @@ public class EventsController : ControllerBase
                                   [FromServices] DaprClient dapr,
                                   CancellationToken ct)
     {
-        Domain.Payment? entity = (await repository.GetAllAsync(x => x.OrderId == @event.OrderId, ct))?.SingleOrDefault();
-        if (entity is null)
-        {
-            throw new UnexpectedErrorException(string.Format("Payment with order ID '{0}' not found", @event.OrderId));
-        }
+        Domain.Payment? entity = ((await repository.GetAllAsync(x => x.OrderId == @event.OrderId, ct))?.SingleOrDefault())
+            ?? throw new UnexpectedErrorException(string.Format("Payment with order ID '{0}' not found", @event.OrderId));
 
         await repository.DeleteAsync(entity.EntityId!.Value, ct);
         var deletedEvent = new PaymentDeletedIntegrationEvent
@@ -69,5 +67,21 @@ public class EventsController : ControllerBase
                                      nameof(PaymentDeletedIntegrationEvent),
                                      deletedEvent,
                                      ct);
+    }
+
+    [HttpPost(nameof(UserDeletedIntegrationEvent))]
+    [Topic(DaprConstants.Components.PubSub, nameof(UserDeletedIntegrationEvent))]
+    public async Task HandleAsync(UserDeletedIntegrationEvent @event,
+                                 [FromServices] GenericRepository<Domain.Payment> repository,
+                                 CancellationToken ct)
+    {
+        IEnumerable<Domain.Payment> userPayments = await repository.GetAllAsync(x => x.UserId == @event.UserId, ct);
+        if (userPayments.Any())
+        {
+            foreach (var userPayment in userPayments)
+            {
+                await repository.DeleteAsync(userPayment.EntityId!.Value, ct);
+            }
+        }
     }
 }

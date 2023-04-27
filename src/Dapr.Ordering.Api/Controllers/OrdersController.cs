@@ -67,10 +67,16 @@ public class OrdersController : ControllerBase
     [ProducesDefaultResponseType(typeof(ErrorResponse))]
     public async Task<IActionResult> DeleteAsync([FromRoute, Required] Guid? orderId,
                                                  [FromServices] GenericRepository<Order> repository,
+                                                 [FromServices] IGenericWriteRepository<OrderItem> itemRepository,
                                                  [FromServices] DaprClient dapr,
                                                  CancellationToken ct)
     {
-        Order order = await repository.GetAsync(orderId!.Value, ct);
+        Order order = await repository.GetWithChildrenAsync(orderId!.Value, "Items");
+        if (order.Items.Any())
+        {
+            foreach (var item in order.Items) await itemRepository.DeleteAsync(item.EntityId!.Value, ct);
+        }
+
         await repository.DeleteAsync(orderId!.Value, ct);
         var deletedEvent = new OrderDeletedIntegrationEvent
         {

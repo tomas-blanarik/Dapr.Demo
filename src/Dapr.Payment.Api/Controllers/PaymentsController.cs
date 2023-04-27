@@ -26,7 +26,6 @@ public class PaymentsController : ControllerBase
     [ProducesDefaultResponseType(typeof(ErrorResponse))]
     public async Task<IActionResult> CreateAsync([FromBody, Bind] CreatePaymentModel model,
                                                  [FromServices] GenericRepository<Domain.Payment> repository,
-                                                 [FromServices] DaprClient dapr,
                                                  CancellationToken ct)
     {
         Domain.Payment entity = await repository.CreateAsync(() =>
