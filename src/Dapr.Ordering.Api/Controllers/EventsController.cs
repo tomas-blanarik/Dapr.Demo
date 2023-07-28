@@ -1,8 +1,8 @@
 ﻿using Dapr.Client;
-using Dapr.Workflow;
 using Dapr.Core;
 using Dapr.Core.Events.Orders;
 using Dapr.Core.Events.Payments;
+using Dapr.Core.Events.Users;
 using Dapr.Core.Exceptions;
 using Dapr.Core.Extensions;
 using Dapr.Core.Repositories;
@@ -11,9 +11,10 @@ using Dapr.Ordering.Api.Entities.Domain;
 using Dapr.Ordering.Api.Entities.DTO;
 using Dapr.Ordering.Api.Entities.Enums;
 using Dapr.Ordering.Api.Entities.Events;
-using Microsoft.AspNetCore.Mvc;
 using Dapr.Ordering.Api.Workflows;
 using Dapr.Core.Events.Users;
+using Dapr.Workflow;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Dapr.Ordering.Api.Controllers;
 
@@ -40,11 +41,8 @@ public class EventsController : ControllerBase
                                   [FromServices] DaprClient dapr,
                                   CancellationToken ct)
     {
-        Order? entity = (await repository.GetAllAsync(x => x.PaymentId == @event.PaymentId, ct))?.SingleOrDefault();
-        if (entity is null)
-        {
-            throw new UnexpectedErrorException(string.Format("Order with payment ID '{0}' not found", @event.PaymentId));
-        }
+        Order? entity = ((await repository.GetAllAsync(x => x.PaymentId == @event.PaymentId, ct))?.SingleOrDefault())
+            ?? throw new UnexpectedErrorException(string.Format("Order with payment ID '{0}' not found", @event.PaymentId));
 
         entity = await repository.UpdateAsync(entity.EntityId!.Value, toUpdate =>
         {
@@ -77,11 +75,8 @@ public class EventsController : ControllerBase
                                   [FromServices] DaprClient dapr,
                                   CancellationToken ct)
     {
-        Order? entity = (await repository.GetAllAsync(x => x.PaymentId == @event.PaymentId, ct))?.SingleOrDefault();
-        if (entity is null)
-        {
-            throw new UnexpectedErrorException(string.Format("Order with payment ID '{0}' not found", @event.PaymentId));
-        }
+        Order? entity = ((await repository.GetAllAsync(x => x.PaymentId == @event.PaymentId, ct))?.SingleOrDefault())
+            ?? throw new UnexpectedErrorException(string.Format("Order with payment ID '{0}' not found", @event.PaymentId));
 
         await repository.UpdateAsync(entity.EntityId!.Value, toUpdate =>
         {
@@ -115,11 +110,8 @@ public class EventsController : ControllerBase
                                   [FromServices] GenericRepository<Order> repository,
                                   CancellationToken ct)
     {
-        Order? entity = (await repository.GetAllAsync(x => x.PaymentId == @event.PaymentId, ct))?.SingleOrDefault();
-        if (entity is null)
-        {
-            throw new UnexpectedErrorException(string.Format("Order with payment ID '{0}' not found", @event.PaymentId));
-        }
+        Order? entity = ((await repository.GetAllAsync(x => x.PaymentId == @event.PaymentId, ct))?.SingleOrDefault())
+            ?? throw new UnexpectedErrorException(string.Format("Order with payment ID '{0}' not found", @event.PaymentId));
 
         await repository.UpdateAsync(entity.EntityId!.Value, toUpdate =>
         {
@@ -193,10 +185,8 @@ public class EventsController : ControllerBase
 
         if (@event.UseWorkflow)
         {
-#pragma warning disable CS0618
             var instanceId = Guid.NewGuid().ToString();
             await engine.ScheduleNewWorkflowAsync(nameof(OrderProcessingWorkflow), instanceId, @event);
-#pragma warning restore CS0618
         }
         else
         {
@@ -216,6 +206,29 @@ public class EventsController : ControllerBase
                                          nameof(OrderCreatedIntegrationEvent),
                                          createdEvent,
                                          ct);
+        }
+    }
+
+    [HttpPost(nameof(UserDeletedIntegrationEvent))]
+    [Topic(DaprConstants.Components.PubSub, nameof(UserDeletedIntegrationEvent))]
+    public async Task HandleAsync(UserDeletedIntegrationEvent @event,
+                                  [FromServices] GenericRepository<Order> repository,
+                                  [FromServices] IGenericWriteRepository<Entities.Domain.OrderItem> itemRepository,
+                                  CancellationToken ct)
+    {
+        IEnumerable<Order> userOrders = await repository.GetAllAsync(x => x.UserId == @event.UserId, ct);
+        if (userOrders.Any())
+        {
+            foreach (var userOrder in userOrders)
+            {
+                Order order = await repository.GetWithChildrenAsync(userOrder.EntityId!.Value, "Items");
+                if (order.Items.Any())
+                {
+                    foreach (var item in order.Items) await itemRepository.DeleteAsync(item.EntityId!.Value, ct);
+                }
+
+                await repository.DeleteAsync(userOrder.EntityId!.Value, ct);
+            }
         }
     }
 }

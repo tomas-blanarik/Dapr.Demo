@@ -18,5 +18,6 @@ public static class ProgramExtensions
         });
 
         builder.Services.AddGenericRepository<Order, OrderingContext>();
+        builder.Services.AddGenericRepository<OrderItem, OrderingContext>();
     }
 }

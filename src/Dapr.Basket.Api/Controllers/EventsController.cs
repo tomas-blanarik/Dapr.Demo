@@ -1,3 +1,4 @@
+using Dapr.Basket.Api.Entities.DTO;
 using Dapr.Basket.Api.Repositories;
 using Dapr.Core;
 using Dapr.Core.Events.Orders;

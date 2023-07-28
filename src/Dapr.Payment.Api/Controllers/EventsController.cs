@@ -52,11 +52,8 @@ public class EventsController : ControllerBase
                                   [FromServices] DaprClient dapr,
                                   CancellationToken ct)
     {
-        Domain.Payment? entity = (await repository.GetAllAsync(x => x.OrderId == @event.OrderId, ct))?.SingleOrDefault();
-        if (entity is null)
-        {
-            throw new UnexpectedErrorException(string.Format("Payment with order ID '{0}' not found", @event.OrderId));
-        }
+        Domain.Payment? entity = ((await repository.GetAllAsync(x => x.OrderId == @event.OrderId, ct))?.SingleOrDefault())
+            ?? throw new UnexpectedErrorException(string.Format("Payment with order ID '{0}' not found", @event.OrderId));
 
         await repository.DeleteAsync(entity.EntityId!.Value, ct);
         var deletedEvent = new PaymentDeletedIntegrationEvent
