@@ -2,6 +2,7 @@
 using Dapr.Core;
 using Dapr.Core.Events.Orders;
 using Dapr.Core.Events.Payments;
+using Dapr.Core.Events.Users;
 using Dapr.Core.Exceptions;
 using Dapr.Core.Repositories;
 using Dapr.Core.Repositories.Generic;
@@ -69,5 +70,21 @@ public class EventsController : ControllerBase
                                      nameof(PaymentDeletedIntegrationEvent),
                                      deletedEvent,
                                      ct);
+    }
+
+    [HttpPost(nameof(UserDeletedIntegrationEvent))]
+    [Topic(DaprConstants.Components.PubSub, nameof(UserDeletedIntegrationEvent))]
+    public async Task HandleAsync(UserDeletedIntegrationEvent @event,
+                                  [FromServices] GenericRepository<Domain.Payment> repository,
+                                  CancellationToken ct)
+    {
+        var payments = await repository.GetAllAsync(x => x.UserId == @event.UserId, ct);
+        if (payments.Any())
+        {
+            foreach (var payment in payments)
+            {
+                await repository.DeleteAsync(payment.EntityId!.Value, ct);
+            }
+        }
     }
 }

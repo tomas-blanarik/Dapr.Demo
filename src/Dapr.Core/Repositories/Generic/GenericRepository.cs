@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dapr.Core.Repositories.Generic;
 
-public class GenericRepository<T> : IGenericReadRepository<T>, IGenericWriteRepository<T> where T : class, IDomainEntity
+public class GenericRepository<T> : IGenericReadRepository<T>, IGenericWriteRepository<T> 
+    where T : class, IDomainEntity
 {
     private readonly IEntityStorage<T> _storage;
 

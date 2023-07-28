@@ -18,7 +18,7 @@ builder.Services.AddOptions();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
-    .AddDapr();
+    .AddDapr(); //1
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(o => o.EnableAnnotations());
 builder.Services.AddRouting(o => o.LowercaseUrls = true);
@@ -33,13 +33,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCloudEvents();
+app.UseCloudEvents(); //2
 app.UseErrorHandlingMiddleware();
 app.UseZipkin(AppName);
 
 app.MapGet("/", () => Results.LocalRedirect("~/swagger")).ExcludeFromDescription();
 app.MapControllers();
-app.MapSubscribeHandler();
+app.MapSubscribeHandler(); //3
 app.MapCustomHealthChecks(responseWriter: UIResponseWriter.WriteHealthCheckUIResponse);
 
 await app.RunAsync();

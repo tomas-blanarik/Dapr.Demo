@@ -21,8 +21,8 @@ public class AuditController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResult<AuditItemDTO>))]
     [ProducesDefaultResponseType(typeof(ErrorResponse))]
     public async Task<IActionResult> ListAsync([FromQuery] ListAuditItemsQuery request,
-                                                         [FromServices] IGenericReadRepository<AuditItem> repository,
-                                                         CancellationToken ct)
+                                               [FromServices] IGenericReadRepository<AuditItem> repository,
+                                               CancellationToken ct)
     {
         Expression<Func<AuditItem, bool>> searchExpression = _ => true;
         if (request.UserId is not null)

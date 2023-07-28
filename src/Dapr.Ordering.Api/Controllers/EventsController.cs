@@ -13,6 +13,7 @@ using Dapr.Ordering.Api.Entities.Enums;
 using Dapr.Ordering.Api.Entities.Events;
 using Microsoft.AspNetCore.Mvc;
 using Dapr.Ordering.Api.Workflows;
+using Dapr.Core.Events.Users;
 
 namespace Dapr.Ordering.Api.Controllers;
 
@@ -131,6 +132,22 @@ public class EventsController : ControllerBase
             toUpdate.PaymentId = null;
             toUpdate.Error = "Payment was deleted";
         }, ct);
+    }
+
+    [HttpPost(nameof(UserDeletedIntegrationEvent))]
+    [Topic(DaprConstants.Components.PubSub, nameof(UserDeletedIntegrationEvent))]
+    public async Task HandleAsync(UserDeletedIntegrationEvent @event,
+                                  [FromServices] GenericRepository<Order> repository,
+                                  CancellationToken ct)
+    {
+        var orders = await repository.GetAllAsync(x => x.UserId == @event.UserId, ct);
+        if (orders.Any())
+        {
+            foreach (var order in orders)
+            {
+                await repository.DeleteAsync(order.EntityId!.Value, ct);
+            }
+        }
     }
 
     [HttpPost(nameof(UserCheckoutAcceptedIntegrationEvent))]
