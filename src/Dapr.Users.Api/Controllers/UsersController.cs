@@ -93,7 +93,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpDelete]
-    [SwaggerOperation(Tags = new[] { "Developer Tools" })]
+    [SwaggerOperation(Tags = ["Developer Tools"])]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesDefaultResponseType(typeof(ErrorResponse))]
     public async Task<IActionResult> DeleteAllAsync([FromServices] IGenericWriteRepository<User> repository,

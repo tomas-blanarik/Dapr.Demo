@@ -3,14 +3,9 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Dapr.Core.HealthChecks;
 
-public class DaprHealthCheck : IHealthCheck
+public class DaprHealthCheck(DaprClient daprClient) : IHealthCheck
 {
-    private readonly DaprClient _daprClient;
-
-    public DaprHealthCheck(DaprClient daprClient)
-    {
-        _daprClient = daprClient;
-    }
+    private readonly DaprClient _daprClient = daprClient;
 
     public async Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context,

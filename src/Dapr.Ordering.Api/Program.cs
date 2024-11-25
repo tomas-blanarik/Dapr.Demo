@@ -16,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddCustomSerilog(AppName);
 builder.AddCustomConfiguration();
 builder.AddCustomHealthChecks()
-    .AddMySql(builder.Configuration.GetConnectionString("OrdersDbConnection")!, "OrderingAPIDB-check", tags: new[] { "ordering-db" });
+    .AddDbContextCheck<OrderingContext>("OrderingAPIDB-check", tags: ["ordering-db"]);
 
 builder.AddCustomDatabaseAndRepositories();
 builder.AddErrorHandlingMiddleware();

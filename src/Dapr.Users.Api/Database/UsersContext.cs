@@ -4,12 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dapr.Users.Api.Database;
 
-public class UsersContext : DbContext, IEntityStorage<User>
+public class UsersContext(DbContextOptions<UsersContext> dbOptions) : DbContext(dbOptions), IEntityStorage<User>
 {
-    public UsersContext(DbContextOptions<UsersContext> dbOptions)
-        : base(dbOptions)
-    { }
-
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<User> Set() => Users;
 }

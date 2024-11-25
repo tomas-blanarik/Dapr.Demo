@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Dapr.Payment.Api/bin/Debug/net7.0/Dapr.Payment.Api.dll",
+            "program": "${workspaceFolder}/Dapr.Payment.Api/bin/Debug/net8.0/Dapr.Payment.Api.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Dapr.Payment.Api",
             "stopAtEntry": false,

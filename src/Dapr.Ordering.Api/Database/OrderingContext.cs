@@ -4,12 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dapr.Ordering.Api.Database;
 
-public class OrderingContext : DbContext, IEntityStorage<Order>, IEntityStorage<OrderItem>
+public class OrderingContext(DbContextOptions<OrderingContext> dbOptions) : DbContext(dbOptions), IEntityStorage<Order>, IEntityStorage<OrderItem>
 {
-    public OrderingContext(DbContextOptions<OrderingContext> dbOptions)
-        : base(dbOptions)
-    { }
-
     public DbSet<Order> Orders { get; set; } = null!;
     public DbSet<OrderItem> OrderItems { get; set; } = null!;
     public DbSet<Order> Set() => Orders;

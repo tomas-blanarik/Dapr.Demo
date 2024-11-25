@@ -4,14 +4,9 @@ using Dapr.Core;
 
 namespace Dapr.Basket.Api.Repositories;
 
-public class DaprBasketRepository : IBasketRepository
+public class DaprBasketRepository(DaprClient daprClient) : IBasketRepository
 {
-    private readonly DaprClient _daprClient;
-
-    public DaprBasketRepository(DaprClient daprClient)
-    {
-        _daprClient = daprClient;
-    }
+    private readonly DaprClient _daprClient = daprClient;
 
     public Task DeleteAsync(string customerId, CancellationToken ct = default)
         => _daprClient.DeleteStateAsync(DaprConstants.Components.StateStore, customerId, cancellationToken: ct);

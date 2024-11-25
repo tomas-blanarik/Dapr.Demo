@@ -6,16 +6,10 @@ namespace Dapr.Ordering.Api.Activities;
 
 public record UpdateOrderRequest(Guid OrderId, Guid PaymentId);
 
-public class UpdateOrderWithPaymentActivity : WorkflowActivity<UpdateOrderRequest, object>
+public class UpdateOrderWithPaymentActivity(IGenericWriteRepository<Order> repository, ILogger<UpdateOrderWithPaymentActivity> logger) : WorkflowActivity<UpdateOrderRequest, object>
 {
-    private readonly IGenericWriteRepository<Order> _repository;
-    private readonly ILogger<UpdateOrderWithPaymentActivity> _logger;
-
-    public UpdateOrderWithPaymentActivity(IGenericWriteRepository<Order> repository, ILogger<UpdateOrderWithPaymentActivity> logger)
-    {
-        _repository = repository;
-        _logger = logger;
-    }
+    private readonly IGenericWriteRepository<Order> _repository = repository;
+    private readonly ILogger<UpdateOrderWithPaymentActivity> _logger = logger;
 
     public override async Task<object> RunAsync(WorkflowActivityContext context, UpdateOrderRequest input)
     {

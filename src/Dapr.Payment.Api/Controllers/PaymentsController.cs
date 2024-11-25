@@ -21,7 +21,7 @@ namespace Dapr.Payment.Api.Controllers;
 public class PaymentsController : ControllerBase
 {
     [HttpPost]
-    [SwaggerOperation(Tags = new[] { "Workflow" })]
+    [SwaggerOperation(Tags = ["Workflow"])]
     [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(PaymentDTO))]
     [ProducesDefaultResponseType(typeof(ErrorResponse))]
     public async Task<IActionResult> CreateAsync([FromBody, Bind] CreatePaymentModel model,
@@ -154,7 +154,7 @@ public class PaymentsController : ControllerBase
     }
 
     [HttpDelete]
-    [SwaggerOperation(Tags = new[] { "Developer Tools" })]
+    [SwaggerOperation(Tags = ["Developer Tools"])]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesDefaultResponseType(typeof(ErrorResponse))]
     public async Task<IActionResult> DeleteAllAsync([FromServices] IGenericWriteRepository<Domain.Payment> repository,

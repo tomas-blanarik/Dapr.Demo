@@ -5,14 +5,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Dapr.Core.Middlewares;
 
-public class ErrorHandlingMiddleware : IMiddleware
+public class ErrorHandlingMiddleware(ILogger<ErrorHandlingMiddleware> logger) : IMiddleware
 {
-    private readonly ILogger<ErrorHandlingMiddleware> _logger;
-
-    public ErrorHandlingMiddleware(ILogger<ErrorHandlingMiddleware> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<ErrorHandlingMiddleware> _logger = logger;
 
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {

@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddCustomSerilog(AppName);
 builder.AddCustomConfiguration();
 builder.AddCustomHealthChecks()
-    .AddMySql(builder.Configuration.GetConnectionString("UsersDbConnection")!, "UsersAPIDB-check", tags: new[] { "users-db" });
+    .AddDbContextCheck<UsersContext>("UsersAPIDB-check", tags: ["users-db"]);
 
 builder.AddCustomDatabaseAndRepositories();
 builder.AddErrorHandlingMiddleware();

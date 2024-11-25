@@ -9,16 +9,10 @@ namespace Dapr.Ordering.Api.Activities;
 public record PaymentRequest(Guid OrderId, Guid UserId);
 public record PaymentResponse(Guid PaymentId);
 
-public class CreatePaymentActivity : WorkflowActivity<PaymentRequest, PaymentResponse?>
+public class CreatePaymentActivity(DaprClient dapr, ILogger<CreatePaymentActivity> logger) : WorkflowActivity<PaymentRequest, PaymentResponse?>
 {
-    private readonly DaprClient _dapr;
-    private readonly ILogger<CreatePaymentActivity> _logger;
-
-    public CreatePaymentActivity(DaprClient dapr, ILogger<CreatePaymentActivity> logger)
-    {
-        _dapr = dapr;
-        _logger = logger;
-    }
+    private readonly DaprClient _dapr = dapr;
+    private readonly ILogger<CreatePaymentActivity> _logger = logger;
 
     public override async Task<PaymentResponse?> RunAsync(WorkflowActivityContext context, PaymentRequest input)
     {

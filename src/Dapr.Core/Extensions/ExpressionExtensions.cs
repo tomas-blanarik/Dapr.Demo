@@ -26,16 +26,10 @@ public static class ExpressionExtensions
         return Expression.Lambda<Func<T, bool>>(Expression.OrElse(left!, right!), parameter);
     }
 
-    private class ReplaceExpressionVisitor : ExpressionVisitor
+    private class ReplaceExpressionVisitor(Expression oldValue, Expression newValue) : ExpressionVisitor
     {
-        private readonly Expression _oldValue;
-        private readonly Expression _newValue;
-
-        public ReplaceExpressionVisitor(Expression oldValue, Expression newValue)
-        {
-            _oldValue = oldValue;
-            _newValue = newValue;
-        }
+        private readonly Expression _oldValue = oldValue;
+        private readonly Expression _newValue = newValue;
 
         public override Expression? Visit(Expression? node)
         {

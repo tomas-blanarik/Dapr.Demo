@@ -27,8 +27,8 @@ public static class WebApplicationBuilderExtensions
             builder.Configuration.AddDaprSecretStore(
                 DaprConstants.Components.SecretStore,
                 daprClient,
-                new[] { "--", ":", "__" },
-                TimeSpan.FromSeconds(10));
+                ["--", ":", "__"],
+                TimeSpan.FromSeconds(30));
 
             Log.Logger.Information("Successfully registered Dapr Secret Store to IConfiguration");
         }

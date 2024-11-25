@@ -16,14 +16,9 @@ namespace Dapr.Basket.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class BasketController : ControllerBase
+public class BasketController(IBasketRepository basketRepository) : ControllerBase
 {
-    private readonly IBasketRepository _basketRepository;
-
-    public BasketController(IBasketRepository basketRepository)
-    {
-        _basketRepository = basketRepository;
-    }
+    private readonly IBasketRepository _basketRepository = basketRepository;
 
     [HttpGet("{userId:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BasketDTO))]
@@ -65,8 +60,7 @@ public class BasketController : ControllerBase
     public async Task<IActionResult> CheckoutAsync([FromRoute, Required] Guid? userId,
                                                    [FromServices] DaprClient dapr,
                                                    [FromServices] ILogger<BasketController> logger,
-                                                   CancellationToken ct,
-                                                   [FromQuery] bool useWorkflow = false)
+                                                   CancellationToken ct)
     {
         UserDTO? user = null;
         try
@@ -105,8 +99,7 @@ public class BasketController : ControllerBase
         var @event = new UserCheckoutAcceptedIntegrationEvent
         {
             Basket = basket,
-            UserId = user.UserId,
-            UseWorkflow = useWorkflow
+            UserId = user.UserId
         };
 
         await dapr.PublishEventAsync(DaprConstants.Components.PubSub, nameof(UserCheckoutAcceptedIntegrationEvent), @event, ct);
@@ -114,7 +107,7 @@ public class BasketController : ControllerBase
     }
 
     [HttpDelete("{userId:guid}")]
-    [SwaggerOperation(Tags = new[] { "Developer Tools" })]
+    [SwaggerOperation(Tags = ["Developer Tools"])]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesDefaultResponseType(typeof(ErrorResponse))]
     public async Task<IActionResult> DeleteAllAsync([FromRoute, Required] Guid? userId,

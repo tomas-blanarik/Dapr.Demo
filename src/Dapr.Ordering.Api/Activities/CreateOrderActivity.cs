@@ -9,16 +9,10 @@ namespace Dapr.Ordering.Api.Activities
     public record OrderRequest(UserCheckoutAcceptedIntegrationEvent Event);
     public record OrderResponse(OrderDTO DTO);
 
-    public class CreateOrderActivity : WorkflowActivity<OrderRequest, OrderResponse?>
+    public class CreateOrderActivity(GenericRepository<Order> repository, ILogger<CreateOrderActivity> logger) : WorkflowActivity<OrderRequest, OrderResponse?>
     {
-        private readonly GenericRepository<Order> _repository;
-        private readonly ILogger<CreateOrderActivity> _logger;
-
-        public CreateOrderActivity(GenericRepository<Order> repository, ILogger<CreateOrderActivity> logger)
-        {
-            _repository = repository;
-            _logger = logger;
-        }
+        private readonly GenericRepository<Order> _repository = repository;
+        private readonly ILogger<CreateOrderActivity> _logger = logger;
 
         public override async Task<OrderResponse?> RunAsync(WorkflowActivityContext context, OrderRequest input)
         {

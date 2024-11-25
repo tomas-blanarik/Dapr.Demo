@@ -12,7 +12,6 @@ using Dapr.Ordering.Api.Entities.DTO;
 using Dapr.Ordering.Api.Entities.Enums;
 using Dapr.Ordering.Api.Entities.Events;
 using Dapr.Ordering.Api.Workflows;
-using Dapr.Core.Events.Users;
 using Dapr.Workflow;
 using Microsoft.AspNetCore.Mvc;
 
@@ -126,28 +125,12 @@ public class EventsController : ControllerBase
         }, ct);
     }
 
-    [HttpPost(nameof(UserDeletedIntegrationEvent))]
-    [Topic(DaprConstants.Components.PubSub, nameof(UserDeletedIntegrationEvent))]
-    public async Task HandleAsync(UserDeletedIntegrationEvent @event,
-                                  [FromServices] GenericRepository<Order> repository,
-                                  CancellationToken ct)
-    {
-        var orders = await repository.GetAllAsync(x => x.UserId == @event.UserId, ct);
-        if (orders.Any())
-        {
-            foreach (var order in orders)
-            {
-                await repository.DeleteAsync(order.EntityId!.Value, ct);
-            }
-        }
-    }
-
     [HttpPost(nameof(UserCheckoutAcceptedIntegrationEvent))]
     [Topic(DaprConstants.Components.PubSub, nameof(UserCheckoutAcceptedIntegrationEvent))]
     public async Task HandleAsync(UserCheckoutAcceptedIntegrationEvent @event,
                                   [FromServices] IGenericWriteRepository<Order> repository,
                                   [FromServices] DaprClient dapr,
-                                  [FromServices] WorkflowEngineClient engine,
+                                  [FromServices] DaprWorkflowClient engine,
                                   [FromServices] ILogger<OrdersController> logger,
                                   CancellationToken ct)
     {

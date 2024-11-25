@@ -1,7 +1,5 @@
 ﻿namespace Dapr.Core.Exceptions;
 
-public class UnexpectedErrorException : Exception
+public class UnexpectedErrorException(string message) : Exception(message)
 {
-    public UnexpectedErrorException(string message) : base(message)
-    { }
 }

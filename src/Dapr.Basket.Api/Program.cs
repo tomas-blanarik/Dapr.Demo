@@ -19,6 +19,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
     .AddDapr(); //1
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(o => o.EnableAnnotations());
 builder.Services.AddRouting(o => o.LowercaseUrls = true);

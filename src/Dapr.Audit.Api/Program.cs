@@ -3,7 +3,6 @@ using Dapr.Audit.Api.Database;
 using Dapr.Audit.Api.Extensions;
 using Dapr.Core.Extensions;
 using HealthChecks.UI.Client;
-using Microsoft.EntityFrameworkCore;
 
 const string AppName = "Audit API";
 
@@ -14,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddCustomSerilog(AppName);
 builder.AddCustomConfiguration();
 builder.AddCustomHealthChecks()
-    .AddMySql(builder.Configuration.GetConnectionString("AuditDbConnection")!, "AuditAPIDB-check", tags: new[] { "audit-db" });
+    .AddDbContextCheck<AuditContext>("AuditAPIDB-check", tags: ["audit-db"]);
 
 builder.AddErrorHandlingMiddleware();
 builder.AddCustomDatabaseAndRepositories();

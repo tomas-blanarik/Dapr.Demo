@@ -1,5 +1,4 @@
-version: '3.7'
-
+---
 services:
   placement:
     image: "daprio/dapr"
@@ -34,7 +33,7 @@ services:
   redis:
     image: redis:latest
     restart: always
-    command: ["redis-server", "--appendonly", "yes"]
+    command: ["redis-server"]
     volumes:
       - redis_data:/data
     networks:
@@ -56,7 +55,7 @@ services:
       - dapr-net
 
   dapr-audit-api-dapr:
-    image: "daprio/daprd:1.9.4"
+    image: "daprio/daprd:latest"
     network_mode: "service:dapr-audit-api"
     restart: always
     command: ["./daprd",
@@ -89,7 +88,7 @@ services:
       - dapr-net
 
   dapr-ordering-api-dapr:
-    image: "daprio/daprd:1.9.4"
+    image: "daprio/daprd:latest"
     network_mode: "service:dapr-ordering-api"
     restart: always
     command: ["./daprd",
@@ -122,7 +121,7 @@ services:
       - dapr-net
 
   dapr-payment-api-dapr:
-    image: "daprio/daprd:1.9.4"
+    image: "daprio/daprd:latest"
     network_mode: "service:dapr-payment-api"
     restart: always
     command: ["./daprd",
@@ -155,7 +154,7 @@ services:
       - dapr-net
 
   dapr-users-api-dapr:
-    image: "daprio/daprd:1.9.4"
+    image: "daprio/daprd:latest"
     network_mode: "service:dapr-users-api"
     restart: always
     command: ["./daprd",
@@ -189,7 +188,7 @@ services:
       - dapr-net
 
   dapr-basket-api-dapr:
-    image: "daprio/daprd:1.9.4"
+    image: "daprio/daprd:latest"
     network_mode: "service:dapr-basket-api"
     restart: always
     command: ["./daprd",

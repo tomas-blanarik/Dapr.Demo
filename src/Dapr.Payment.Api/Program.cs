@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddCustomSerilog(AppName);
 builder.AddCustomConfiguration();
 builder.AddCustomHealthChecks()
-    .AddMySql(builder.Configuration.GetConnectionString("PaymentsDbConnection")!, "PaymentAPIDB-check", tags: new[] { "payment-db" });
+    .AddDbContextCheck<PaymentContext>("PaymentAPIDB-check", tags: ["payment-db"]);
 
 builder.AddCustomDatabaseAndRepositories();
 builder.AddErrorHandlingMiddleware();

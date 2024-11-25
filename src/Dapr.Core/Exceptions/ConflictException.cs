@@ -1,7 +1,5 @@
 ﻿namespace Dapr.Core.Exceptions;
 
-public class ConflictException : Exception
+public class ConflictException(string message) : Exception(message)
 {
-    public ConflictException(string message) : base(message)
-    { }
 }

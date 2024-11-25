@@ -13,14 +13,9 @@ namespace Dapr.Audit.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class EventsController : ControllerBase
+public class EventsController(ILogger<EventsController> logger) : ControllerBase
 {
-    private readonly ILogger<EventsController> _logger;
-
-    public EventsController(ILogger<EventsController> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<EventsController> _logger = logger;
 
     #region Orders
 

@@ -1,11 +1,7 @@
 ﻿namespace Dapr.Core.Exceptions;
 
-public class DomainEntityNotFoundException : Exception
+public class DomainEntityNotFoundException(Type type, Guid id) : Exception(string.Format(_format, type.Name, id))
 {
     private const string _format = "${0} with entity ID '{1}' not found";
-
-    public DomainEntityNotFoundException(Type type, Guid id)
-        : base(string.Format(_format, type.Name, id))
-    { }
 }
 

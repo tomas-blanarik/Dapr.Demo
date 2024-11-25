@@ -7,15 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dapr.Core.Repositories.Generic;
 
-public class GenericRepository<T> : IGenericReadRepository<T>, IGenericWriteRepository<T> 
+public class GenericRepository<T>(IEntityStorage<T> storage) : IGenericReadRepository<T>, IGenericWriteRepository<T> 
     where T : class, IDomainEntity
 {
-    private readonly IEntityStorage<T> _storage;
-
-    public GenericRepository(IEntityStorage<T> storage)
-    {
-        _storage = storage;
-    }
+    private readonly IEntityStorage<T> _storage = storage;
 
     public async Task<T> CreateAsync(Func<T> createFunction, CancellationToken ct = default)
     {

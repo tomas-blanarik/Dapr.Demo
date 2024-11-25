@@ -4,14 +4,9 @@ namespace Dapr.Ordering.Api.Activities;
 
 public record Notification(string Message);
 
-public class NotifyActivity : WorkflowActivity<Notification, object>
+public class NotifyActivity(ILogger<NotifyActivity> logger) : WorkflowActivity<Notification, object>
 {
-    private readonly ILogger<NotifyActivity> _logger;
-
-    public NotifyActivity(ILogger<NotifyActivity> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<NotifyActivity> _logger = logger;
 
     public override Task<object> RunAsync(WorkflowActivityContext context, Notification input)
     {
